@@ -1,38 +1,42 @@
 ﻿using System;
 using System.Web.Security;
+using System.Linq;
 
 namespace TodoApp.Models
 {
-
     public class CustomRoleProvider : RoleProvider
     {
-        public override bool IsUserInRole(string username, string roleName)
+        public override bool IsUserInRole(string UserId, string roleName)
         {
-
-            if ("administrator".Equals(username) && "Administrators".Equals(roleName))
+            using (var db = new AppContext())
             {
-                return true;
-            }
+                var user = db.Users
+                    .Where(u => u.Id == int.Parse(UserId))
+                    .FirstOrDefault();
 
-            if ("user".Equals(username) && "Users".Equals(roleName))
-            {
-                return true;
-            }
+                string[] roles = user.Roles.Select(r => r.RoleName).ToArray();
 
+                if (roles.Contains(roleName))
+                {
+                    return true;
+                }
+            }
             return false;
-
         }
 
-        public override string[] GetRolesForUser(string username)
+        public override string[] GetRolesForUser(string UserId)
         {
-
-            if ("administrator".Equals(username))
+            using (var db = new AppContext())
             {
-                return new string[] { "Administrators" };
+                int id = int.Parse(UserId);
+                var user = db.Users
+                    .Where(u => u.Id == id)
+                    .FirstOrDefault();
+
+                string[] roles = user.Roles.Select(r => r.RoleName).ToArray();
+
+                return roles;
             }
-
-            return new string[] { "Users" };
-
         }
 
         public override void AddUsersToRoles(string[] usernames, string[] roleNames)
@@ -42,17 +46,14 @@ namespace TodoApp.Models
 
         public override string ApplicationName
         {
-
             get
             {
                 throw new NotImplementedException();
             }
-
             set
             {
                 throw new NotImplementedException();
             }
-
         }
 
         public override void CreateRole(string roleName)
@@ -89,7 +90,5 @@ namespace TodoApp.Models
         {
             throw new NotImplementedException();
         }
-
     }
-
 }

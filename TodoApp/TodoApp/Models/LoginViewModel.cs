@@ -5,7 +5,6 @@ namespace TodoApp.Models
 {
     public class LoginViewModel
     {
-
         [Required]
         [DisplayName("ユーザー名")]
         public string UserName { get; set; }
@@ -13,6 +12,5 @@ namespace TodoApp.Models
         [Required]
         [DisplayName("パスワード")]
         public string Password { get; set; }
-
     }
 }

@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Linq;
+using System.Web;
 using System.Web.Security;
 
 namespace TodoApp.Models
@@ -7,34 +9,32 @@ namespace TodoApp.Models
     {
         public override bool ValidateUser(string username, string password)
         {
-            // とりあえず固定で認証
-            if ("administrator".Equals(username) && "password".Equals(password))
+            using (var db = new AppContext())
             {
-                return true;
-            }
+                var user = db.Users
+                    .Where(u => u.UserName == username && u.Password == password)
+                    .FirstOrDefault();
 
-            if ("user".Equals(username) && "password".Equals(password))
-            {
-                return true;
+                if (user != null)
+                {
+                    // 認証OK
+                    HttpContext.Current.Session["AuthUserId"] = user.Id;
+                    return true;
+                }
             }
-
             return false;
-
         }
 
         public override string ApplicationName
         {
-
             get
             {
                 throw new NotImplementedException();
             }
-
             set
             {
                 throw new NotImplementedException();
             }
-
         }
 
         public override bool ChangePassword(string username, string oldPassword, string newPassword)
@@ -161,7 +161,5 @@ namespace TodoApp.Models
         {
             throw new NotImplementedException();
         }
-
     }
-
 }
